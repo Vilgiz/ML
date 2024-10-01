@@ -1,15 +1,14 @@
 import numpy as np
 import random
 import copy
-import pandas
+import pandas as pd
 from typing import NoReturn, Tuple, List
-import csv
 
 # Task 1
 
+
 def read_cancer_dataset(path_to_csv: str) -> Tuple[np.array, np.array]:
     """
-     
     Parameters
     ----------
     path_to_csv : str
@@ -22,14 +21,24 @@ def read_cancer_dataset(path_to_csv: str) -> Tuple[np.array, np.array]:
     y : np.array
         Вектор бинарных меток, 1 соответствует доброкачественной опухоли (M), 
         0 --- злокачественной (B).
-
-    
     """
-    pass
+    data = pd.read_csv(path_to_csv)
+
+    y = data.iloc[:, -1].values
+    X = data.iloc[:, :-1].values
+
+    indices = list(range(len(y)))
+    random.shuffle(indices)
+
+    y = y[indices]
+    X = X[indices]
+
+    return y, X
+
 
 def read_spam_dataset(path_to_csv: str) -> Tuple[np.array, np.array]:
     """
-     
+
     Parameters
     ----------
     path_to_csv : str
@@ -42,11 +51,25 @@ def read_spam_dataset(path_to_csv: str) -> Tuple[np.array, np.array]:
     y : np.array
         Вектор бинарных меток, 
         1 если сообщение содержит спам, 0 если не содержит.
-    
+
     """
-    pass
-    
+    data = pd.read_csv(path_to_csv)
+
+    y = data.iloc[:, -1].values
+
+    X = data.iloc[:, :-1].values
+
+    indices = list(range(len(y)))
+    random.shuffle(indices)
+
+    y = y[indices]
+    X = X[indices]
+
+    return y, X
+
+
 # Task 2
+
 
 def train_test_split(X: np.array, y: np.array, ratio: float) -> Tuple[np.array, np.array, np.array, np.array]:
     """
@@ -72,8 +95,15 @@ def train_test_split(X: np.array, y: np.array, ratio: float) -> Tuple[np.array, 
         Вектор меток для test выборки.
 
     """
-    pass
-    
+    length = int(len(X) * ratio)
+    X_train = X[:length]
+    y_train = y[:length]
+    X_test = X[length:]
+    y_test = X[length:]
+
+    return (X_train, y_train, X_test, y_test)
+
+
 # Task 3
 
 def get_precision_recall_accuracy(y_pred: np.array, y_true: np.array) -> Tuple[np.array, np.array, float]:
@@ -96,9 +126,18 @@ def get_precision_recall_accuracy(y_pred: np.array, y_true: np.array) -> Tuple[n
         Значение метрики accuracy (одно для всех классов).
 
     """
-    pass
-    
+    unique = list(set(y_true))
+    for class_label in unique:
+        TP = np.sum((y_true == class_label) & (y_pred == class_label))
+        TN = np.sum((y_true != class_label) & (y_pred != class_label))
+        FN = np.sum(((y_true != class_label) & (y_pred == class_label)))
+        FP = np.sum(((y_true == class_label) & (y_pred != class_label)))
+
+        print(
+            f'Class {class_label}: TP = {TP}, TN = {TN}, FP = {FP}, FN = {FN}')
+
 # Task 4
+
 
 class KDTree:
     def __init__(self, X: np.array, leaf_size: int = 40):
@@ -116,9 +155,9 @@ class KDTree:
         Returns
         -------
 
-        """        
+        """
         pass
-    
+
     def query(self, X: np.array, k: int = 1) -> List[List]:
         """
 
@@ -136,10 +175,11 @@ class KDTree:
             индексы k ближайших соседей для всех точек из X.
 
         """
-        
+
         pass
-        
+
 # Task 5
+
 
 class KNearest:
     def __init__(self, n_neighbors: int = 5, leaf_size: int = 30):
@@ -152,9 +192,9 @@ class KNearest:
         leaf_size : int
             Минимальный размер листа в KD-дереве.
 
-        """        
-        pass   
-    
+        """
+        pass
+
     def fit(self, X: np.array, y: np.array) -> NoReturn:
         """
 
@@ -165,9 +205,9 @@ class KNearest:
         y : np.array
             Метки точек, по которым строится классификатор.
 
-        """        
+        """
         pass
-        
+
     def predict_proba(self, X: np.array) -> List[np.array]:
         """
 
@@ -175,18 +215,18 @@ class KNearest:
         ----------
         X : np.array
             Набор точек, для которых нужно определить класс.
-        
+
         Returns
         -------
         list[np.array]
             Список np.array (длина каждого np.array равна числу классов):
             вероятности классов для каждой точки X.
-            
+
 
         """
-    
+
         pass
-        
+
     def predict(self, X: np.array) -> np.array:
         """
 
@@ -194,12 +234,12 @@ class KNearest:
         ----------
         X : np.array
             Набор точек, для которых нужно определить класс.
-        
+
         Returns
         -------
         np.array
             Вектор предсказанных классов.
-            
+
 
         """
         return np.argmax(self.predict_proba(X), axis=1)
